@@ -20,6 +20,8 @@ import { cn } from '@/lib/utils';
 
 function RealtimeIndicator() {
   const { status } = useRealtime();
+  // Realtime is intentionally off on serverless hosting — don't show "offline".
+  if (import.meta.env.VITE_REALTIME === 'off') return null;
   const config = {
     connected: {
       label: 'Live',

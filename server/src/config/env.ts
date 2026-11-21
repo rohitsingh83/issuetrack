@@ -24,7 +24,10 @@ const envSchema = z.object({
   /** Extra origin patterns (comma separated, `*` = wildcard), e.g. https://*.my-preview.app */
   CLIENT_ORIGIN_PATTERNS: z.string().default(''),
   TRUST_PROXY: boolish.default(false),
-  UPLOAD_DIR: z.string().default(path.join(process.cwd(), 'uploads')),
+  // Serverless hosts (Vercel) only allow writes under /tmp.
+  UPLOAD_DIR: z
+    .string()
+    .default(process.env.VERCEL ? '/tmp/uploads' : path.join(process.cwd(), 'uploads')),
   MAX_UPLOAD_MB: z.coerce.number().positive().default(5),
   AUTH_RATE_LIMIT_WINDOW_MINUTES: z.coerce.number().positive().default(15),
   AUTH_RATE_LIMIT_MAX: z.coerce.number().positive().default(30),
@@ -63,8 +66,17 @@ function splitList(value: string): string[] {
     .filter(Boolean);
 }
 
+/** Hostnames Vercel injects for the current deployment (same-origin SPA + API). */
+const vercelOrigins = [
+  process.env.VERCEL_URL,
+  process.env.VERCEL_BRANCH_URL,
+  process.env.VERCEL_PROJECT_PRODUCTION_URL,
+]
+  .filter((host): host is string => Boolean(host))
+  .map((host) => `https://${host.replace(/^https?:\/\//, '').replace(/\/$/, '')}`);
+
 /** CORS / socket.io allow-list derived from CLIENT_ORIGIN (comma separated). */
-export const allowedOrigins = splitList(env.CLIENT_ORIGIN);
+export const allowedOrigins = [...new Set([...splitList(env.CLIENT_ORIGIN), ...vercelOrigins])];
 
 /**
  * Wildcard origin patterns. Development automatically trusts HTTPS sandbox

@@ -15,7 +15,9 @@ import { queryKeys } from '@/lib/queryKeys';
 import type { ActivityItem, Comment, Issue } from '@/types';
 import { useAuth } from './useAuth';
 
-type ConnectionState = 'connecting' | 'connected' | 'disconnected';
+const REALTIME_DISABLED = import.meta.env.VITE_REALTIME === 'off';
+
+type ConnectionState ='connecting' | 'connected' | 'disconnected';
 
 interface RealtimeContextValue {
   status: ConnectionState;
@@ -39,7 +41,8 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
   const userId = user?.id;
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    // Serverless hosts (Vercel) cannot keep a Socket.io server alive.
+    if (!isAuthenticated || REALTIME_DISABLED) {
       socketRef.current?.disconnect();
       socketRef.current = null;
       setStatus('disconnected');
