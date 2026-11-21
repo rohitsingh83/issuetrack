@@ -13,7 +13,6 @@
 import type { IncomingMessage, ServerResponse } from 'http';
 import { createApp } from '../server/src/app';
 import { connectDatabase } from '../server/src/config/db';
-import mongoose from 'mongoose';
 import { Project } from '../server/src/models/Project';
 import { populateSeedData } from '../server/src/seed/seed';
 
@@ -31,7 +30,8 @@ async function seedOnce(): Promise<void> {
   const demoProjectExists = await Project.exists({ key: 'WEB' });
   if (demoProjectExists) return;
 
-  const meta = mongoose.connection.collection<{ _id: string; at: Date }>('_meta');
+  // Use the model's connection: /api has no node_modules of its own.
+  const meta = Project.db.collection<{ _id: string; at: Date }>('_meta');
   try {
     await meta.insertOne({ _id: SEED_LOCK_ID, at: new Date() });
   } catch (error) {
