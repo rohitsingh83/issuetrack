@@ -17,7 +17,7 @@ What's inside:
 ✅ Role-based access — Owner, Admin, Member, Viewer — enforced in the API, not just the UI
 ✅ Comments, activity history, screenshot attachments, URL-shareable filters
 ✅ Helmet, CORS allow-list, rate limiting, Zod validation on every request
-✅ 86 automated tests (Jest + Supertest, Vitest + Testing Library)
+✅ 90 automated tests (Jest + Supertest, Vitest + Testing Library)
 ✅ Deployed on Vercel with MongoDB Atlas
 
 🔗 Live demo: https://issuetrack-eight.vercel.app (one-click demo accounts on the sign-in page)
