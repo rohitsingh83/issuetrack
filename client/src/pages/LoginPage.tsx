@@ -16,9 +16,9 @@ const DEMO_PASSWORD = 'Password123!';
 
 const DEMO_PERSONAS = [
   { name: 'Avery Chen', role: 'Owner', email: 'owner@demo.dev', avatarBg: 'bg-indigo-600', initials: 'AC' },
-  { name: 'Priya Patel', role: 'Admin', email: 'admin@demo.dev', avatarBg: 'bg-emerald-600', initials: 'PP' },
-  { name: 'Marcus Johnson', role: 'Member', email: 'member@demo.dev', avatarBg: 'bg-amber-600', initials: 'MJ' },
-  { name: 'Sofia Rossi', role: 'Viewer', email: 'viewer@demo.dev', avatarBg: 'bg-purple-600', initials: 'SR' },
+  { name: 'Priya Nair', role: 'Admin', email: 'admin@demo.dev', avatarBg: 'bg-emerald-600', initials: 'PN' },
+  { name: 'Marcus Webb', role: 'Member', email: 'member@demo.dev', avatarBg: 'bg-amber-600', initials: 'MW' },
+  { name: 'Sofia Ruiz', role: 'Viewer', email: 'viewer@demo.dev', avatarBg: 'bg-purple-600', initials: 'SR' },
 ];
 
 export function LoginPage() {

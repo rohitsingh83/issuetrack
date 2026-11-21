@@ -1,9 +1,24 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { queryKeys } from '@/lib/queryKeys';
 import type { Project } from '@/types';
 import { useRealtime } from './useRealtime';
+
+/**
+ * Writes a project returned by a mutation into the detail cache.
+ *
+ * Mutation responses (update, add/remove member, change role) carry the
+ * project but not the caller's `role`, which only the detail endpoint
+ * includes. Replacing the cache wholesale dropped `role`, so the UI fell back
+ * to "viewer" and hid the owner's controls until a reload. Keep the known role.
+ */
+export function cacheProject(queryClient: QueryClient, project: Project): void {
+  queryClient.setQueryData<Project>(queryKeys.project(project.id), (previous) => ({
+    ...project,
+    role: project.role ?? previous?.role,
+  }));
+}
 
 export function useProjects() {
   return useQuery({
@@ -56,7 +71,7 @@ export function useCreateProject() {
     onSuccess: (project) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.projects });
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
-      queryClient.setQueryData(queryKeys.project(project.id), project);
+      cacheProject(queryClient, { ...project, role: project.role ?? 'owner' });
       socket?.emit('join:project', project.id);
       toast.success(`Project “${project.name}” created`);
     },
@@ -70,7 +85,7 @@ export function useUpdateProject(projectId: string) {
     mutationFn: async (payload: { name?: string; description?: string }) =>
       (await api.projects.update(projectId, payload)).data,
     onSuccess: (project: Project) => {
-      queryClient.setQueryData(queryKeys.project(projectId), project);
+      cacheProject(queryClient, project);
       queryClient.invalidateQueries({ queryKey: queryKeys.projects });
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
       toast.success('Project updated');

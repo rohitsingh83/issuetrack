@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { queryKeys } from '@/lib/queryKeys';
 import type { Project } from '@/types';
+import { cacheProject } from './useProjects';
 
 export function useMembers(projectId?: string) {
   return useQuery({
@@ -13,7 +14,8 @@ export function useMembers(projectId?: string) {
 }
 
 function syncProject(queryClient: ReturnType<typeof useQueryClient>, project: Project) {
-  queryClient.setQueryData(queryKeys.project(project.id), project);
+  cacheProject(queryClient, project);
+  queryClient.invalidateQueries({ queryKey: queryKeys.project(project.id) });
   queryClient.invalidateQueries({ queryKey: queryKeys.projects });
   queryClient.invalidateQueries({ queryKey: queryKeys.members(project.id) });
   queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
