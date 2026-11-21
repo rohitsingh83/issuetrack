@@ -277,6 +277,12 @@ Full tables live in [`docs/deployment.md`](docs/deployment.md#5-environment-vari
    **User & authentication → Social connections** in the [Clerk dashboard](https://dashboard.clerk.com).
 3. Restart `npm run dev`. The button appears only when **both** keys are set.
 
+**Without a secret key (used on the live Vercel site):** add custom session claims in Clerk
+(`email` = `{{user.primary_email_address}}`, `name` = `{{user.full_name}}`, `picture` = `{{user.image_url}}`) and set
+`CLERK_JWT_KEY` on the API to the instance's **public** key (PEM from `https://<frontend-api>/.well-known/jwks.json`).
+The API then verifies the token's RS256 signature, expiry and authorised origin locally and reads the email from the
+signed claims — no secret ever has to be stored on the host.
+
 How it stays secure: the browser sends only Clerk's short-lived session token to `POST /api/auth/clerk`. The API
 verifies its signature, expiry and authorised origin with `@clerk/backend`, reads the user's **verified** primary
 email from Clerk, then finds or creates the matching IssueTrack account and sets the usual JWT cookie. Sending an

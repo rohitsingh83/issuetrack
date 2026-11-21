@@ -36,6 +36,15 @@ const envSchema = z.object({
   SEED_DEMO_PASSWORD: z.string().default('Password123!'),
   /** Clerk secret key (sk_test_… / sk_live_…). Enables "Continue with Clerk" sign-in. */
   CLERK_SECRET_KEY: z.string().trim().default(''),
+  /**
+   * Clerk instance PUBLIC key (PEM, from the instance JWKS). Lets the API verify
+   * Clerk session tokens without the secret key; the session token must then
+   * carry an `email` claim (Clerk → Sessions → customize session token).
+   */
+  CLERK_JWT_KEY: z
+    .string()
+    .default('')
+    .transform((v) => v.replace(/\\n/g, '\n').trim()),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -103,7 +112,7 @@ export function isOriginAllowed(origin?: string | null): boolean {
   return patternRegExps.some((re) => re.test(normalised));
 }
 
-export const isClerkEnabled = env.CLERK_SECRET_KEY.length > 0;
+export const isClerkEnabled = env.CLERK_SECRET_KEY.length > 0 || env.CLERK_JWT_KEY.length > 0;
 
 export const MAX_UPLOAD_BYTES = Math.round(env.MAX_UPLOAD_MB * 1024 * 1024);
 export const ALLOWED_UPLOAD_MIME = [

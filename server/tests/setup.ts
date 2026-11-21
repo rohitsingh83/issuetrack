@@ -18,6 +18,9 @@ process.env.UPLOAD_DIR = path.join(os.tmpdir(), 'issuetrack-test-uploads');
 process.env.CLIENT_ORIGIN = 'http://localhost:5173';
 process.env.CLIENT_ORIGIN_PATTERNS = 'https://*.preview.test';
 process.env.COOKIE_SECURE = 'false';
+// Never let a developer's local Clerk keys leak into tests (dotenv does not override these).
+process.env.CLERK_SECRET_KEY = '';
+process.env.CLERK_JWT_KEY = '';
 
 import mongoose from 'mongoose';
 import { connectDatabase, disconnectDatabase } from '../src/config/db';

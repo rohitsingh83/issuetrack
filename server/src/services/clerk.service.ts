@@ -21,9 +21,49 @@ export interface ClerkIdentity {
  * the token signature, expiry and authorised party are checked against Clerk,
  * and the email comes from Clerk's Backend API, not from the request body.
  */
+/**
+ * Networkless verification with the instance's public key. Used when the
+ * server has no secret key: the signed session token itself must carry the
+ * user's primary email (custom session claims `email`, `name`, `picture`).
+ * Clerk only lets a verified address be the primary one, and the signature
+ * proves the claims came from Clerk, so the browser still cannot pick an email.
+ */
+export async function identityFromSignedToken(
+  sessionToken: string,
+  jwtKey: string,
+  authorizedParties: string[] = allowedOrigins,
+): Promise<ClerkIdentity> {
+  let payload: Record<string, unknown>;
+  try {
+    payload = (await verifyToken(sessionToken, { jwtKey, authorizedParties })) as Record<
+      string,
+      unknown
+    >;
+  } catch {
+    throw ApiError.unauthorized('Your Clerk session is invalid or has expired');
+  }
+
+  const email = typeof payload.email === 'string' ? payload.email.toLowerCase().trim() : '';
+  if (!email || !email.includes('@')) {
+    throw ApiError.forbidden('Your Clerk session does not include a verified email address');
+  }
+  const name = typeof payload.name === 'string' ? payload.name.trim() : '';
+  const picture = typeof payload.picture === 'string' ? payload.picture : '';
+
+  return {
+    clerkUserId: String(payload.sub),
+    email,
+    name: name || email.split('@')[0],
+    avatarUrl: picture || null,
+  };
+}
+
 export async function resolveClerkIdentity(sessionToken: string): Promise<ClerkIdentity> {
   if (!isClerkEnabled) {
     throw new ApiError(503, 'Clerk sign-in is not configured on this server', 'CLERK_DISABLED');
+  }
+  if (!env.CLERK_SECRET_KEY) {
+    return identityFromSignedToken(sessionToken, env.CLERK_JWT_KEY);
   }
 
   let clerkUserId: string;
