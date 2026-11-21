@@ -26,6 +26,10 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
+export const clerkLoginSchema = z.object({
+  token: z.string().trim().min(20, 'A Clerk session token is required').max(8192),
+});
+
 export const updateProfileSchema = z
   .object({
     name: z.string().trim().min(2, 'Name must be at least 2 characters').max(80).optional(),

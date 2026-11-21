@@ -11,6 +11,8 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   login: (payload: { email: string; password: string }) => Promise<User>;
   register: (payload: { name: string; email: string; password: string }) => Promise<User>;
+  /** Exchanges a Clerk session token for an IssueTrack session (verified by the API). */
+  loginWithClerk: (sessionToken: string) => Promise<User>;
   logout: () => Promise<void>;
   updateUser: (user: User) => void;
   isLoggingOut: boolean;
@@ -61,6 +63,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  const clerkMutation = useMutation({
+    mutationFn: async (sessionToken: string) => {
+      const { data: result } = await api.auth.clerk(sessionToken);
+      return result.user;
+    },
+    onSuccess: (user) => {
+      queryClient.setQueryData(queryKeys.me, user);
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
+      toast.success(`Welcome, ${user.name.split(' ')[0]}!`);
+    },
+  });
+
+  const loginWithClerk = useCallback(
+    async (sessionToken: string) => clerkMutation.mutateAsync(sessionToken),
+    [clerkMutation],
+  );
+
   const logoutMutation = useMutation({
     mutationFn: () => api.auth.logout(),
     onSuccess: () => {
@@ -102,11 +122,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: Boolean(data),
       login,
       register,
+      loginWithClerk,
       logout,
       updateUser,
       isLoggingOut: logoutMutation.isPending,
     }),
-    [data, isLoading, login, register, logout, updateUser, logoutMutation.isPending],
+    [data, isLoading, login, register, loginWithClerk, logout, updateUser, logoutMutation.isPending],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

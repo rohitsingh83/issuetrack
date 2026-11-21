@@ -52,3 +52,4 @@ server/.jest-cache/
 .claude/
 .sudo_as_admin_successful
 
+server/.test-db-url

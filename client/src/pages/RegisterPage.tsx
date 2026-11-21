@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle, Eye, EyeOff, Lock, Mail, User } from 'lucide-react';
 import { AuthLayout } from '@/components/auth/AuthLayout';
+import { ClerkSignIn } from '@/components/auth/ClerkSignIn';
 import { Button } from '@/components/ui/Button';
 import { FormField, Input } from '@/components/ui/FormControls';
 import { useAuth } from '@/hooks/useAuth';
@@ -65,6 +66,9 @@ export function RegisterPage() {
         </>
       }
     >
+      <div className="mb-4">
+        <ClerkSignIn label="Sign up with Google or GitHub" />
+      </div>
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
         {formError && (
           <div

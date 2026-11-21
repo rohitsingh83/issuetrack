@@ -31,6 +31,8 @@ const envSchema = z.object({
   API_RATE_LIMIT_WINDOW_MINUTES: z.coerce.number().positive().default(15),
   API_RATE_LIMIT_MAX: z.coerce.number().positive().default(2000),
   SEED_DEMO_PASSWORD: z.string().default('Password123!'),
+  /** Clerk secret key (sk_test_… / sk_live_…). Enables "Continue with Clerk" sign-in. */
+  CLERK_SECRET_KEY: z.string().trim().default(''),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -88,6 +90,8 @@ export function isOriginAllowed(origin?: string | null): boolean {
   if (allowedOrigins.includes(normalised)) return true;
   return patternRegExps.some((re) => re.test(normalised));
 }
+
+export const isClerkEnabled = env.CLERK_SECRET_KEY.length > 0;
 
 export const MAX_UPLOAD_BYTES = Math.round(env.MAX_UPLOAD_MB * 1024 * 1024);
 export const ALLOWED_UPLOAD_MIME = [

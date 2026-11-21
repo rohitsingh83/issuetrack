@@ -36,7 +36,8 @@ API, not just hidden in the UI.
 ## Live feature tour
 
 **Auth & accounts**
-Email + password sign-up/sign-in, JWT in an httpOnly cookie, session bootstrap on reload, logout,
+Email + password sign-up/sign-in, optional **"Continue with Google or GitHub" via Clerk** (the API verifies the
+Clerk session token server-side before issuing its own session), one-click demo accounts, JWT in an httpOnly cookie, session bootstrap on reload, logout,
 profile editing, password change, protected client routes with redirect-back-to-intended-page.
 
 **Projects**
@@ -246,12 +247,26 @@ Full tables live in [`docs/deployment.md`](docs/deployment.md#5-environment-vari
 | `JWT_SECRET` | ≥32 random chars — signs session and file tokens |
 | `CLIENT_ORIGIN` | Comma-separated allowed browser origins (CORS + credentials) |
 | `COOKIE_SECURE` / `COOKIE_SAME_SITE` | `true` / `none` when the SPA is on another site (Vercel + Render) |
+| `CLERK_SECRET_KEY` | Optional — Clerk secret key (`sk_test_…`); enables Google/GitHub sign-in |
 | `PORT`, `JWT_EXPIRES_IN`, `COOKIE_NAME`, `UPLOAD_DIR`, `MAX_UPLOAD_MB`, rate-limit pairs | Optional tuning |
 
 | Client (`client/.env.local`) | Purpose |
 | ---------------------------- | ------- |
 | `VITE_API_URL` | Full API base (`https://api.example.com/api`); leave empty in dev to use the Vite proxy |
 | `VITE_PROXY_TARGET` | Dev proxy target, default `http://localhost:4000` |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Optional — Clerk publishable key (`pk_test_…`) from the same Clerk app |
+
+### Clerk sign-in (Google / GitHub)
+
+1. In the [Clerk dashboard](https://dashboard.clerk.com) open your application → **API keys**.
+2. Put the publishable key in `client/.env.local` as `VITE_CLERK_PUBLISHABLE_KEY` and the secret key in
+   `server/.env` as `CLERK_SECRET_KEY`. Enable Google/GitHub under **User & authentication → Social connections**.
+3. Restart `npm run dev`. The button appears only when **both** keys are set.
+
+How it stays secure: the browser sends only Clerk's short-lived session token to `POST /api/auth/clerk`. The API
+verifies its signature, expiry and authorised origin with `@clerk/backend`, reads the user's **verified** primary
+email from Clerk, then finds or creates the matching IssueTrack account and sets the usual JWT cookie. Sending an
+email address by itself is rejected.
 
 No real credentials are committed — only the `*.env.example` templates.
 

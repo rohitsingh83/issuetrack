@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+﻿import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LoginPage } from '@/pages/LoginPage';
@@ -99,4 +99,12 @@ describe('LoginPage', () => {
     expect(password).toHaveAttribute('type', 'text');
     expect(password).toHaveValue('secret123');
   });
-});
+  it('signs in with one click from a demo persona', async () => {
+    const user = userEvent.setup();
+    loginMock.mockResolvedValue({ id: 'u1', name: 'Avery Chen' });
+    renderWithProviders(<LoginPage />);
+    await user.click(screen.getByRole('button', { name: /sign in as avery chen, owner/i }));
+    await waitFor(() =>
+      expect(loginMock).toHaveBeenCalledWith({ email: 'owner@demo.dev', password: 'Password123!' }),
+    );
+  });});

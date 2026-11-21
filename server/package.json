@@ -22,6 +22,7 @@
     "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --forceExit --coverage"
   },
   "dependencies": {
+    "@clerk/backend": "^3.31.4",
     "@volter/twin-mongodb": "^0.1.37",
     "bcryptjs": "^2.4.3",
     "compression": "^1.7.4",

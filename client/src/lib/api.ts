@@ -107,6 +107,14 @@ export const api = {
       }),
     login: (payload: { email: string; password: string }) =>
       request<{ user: User; token: string }>({ method: 'POST', url: '/auth/login', data: payload }),
+    clerk: (sessionToken: string) =>
+      request<{ user: User; token: string }>({
+        method: 'POST',
+        url: '/auth/clerk',
+        data: { token: sessionToken },
+      }),
+    providers: () =>
+      request<{ password: boolean; clerk: boolean }>({ method: 'GET', url: '/auth/providers' }),
     logout: () => request<{ message: string }>({ method: 'POST', url: '/auth/logout' }),
     me: () => request<{ user: User }>({ method: 'GET', url: '/auth/me' }),
   },
