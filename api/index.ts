@@ -13,16 +13,48 @@
 import type { IncomingMessage, ServerResponse } from 'http';
 import { createApp } from '../server/src/app';
 import { connectDatabase } from '../server/src/config/db';
-import { User } from '../server/src/models/User';
+import mongoose from 'mongoose';
+import { Project } from '../server/src/models/Project';
 import { populateSeedData } from '../server/src/seed/seed';
 
 const app = createApp();
 let ready: Promise<void> | null = null;
 
+const SEED_LOCK_ID = 'demo-seed-v1';
+
+/**
+ * Seeds the demo dataset exactly once per database. Several cold-starting
+ * instances can race here, so a unique lock document decides the single winner;
+ * everyone else skips. If seeding fails the lock is released for a retry.
+ */
+async function seedOnce(): Promise<void> {
+  const demoProjectExists = await Project.exists({ key: 'WEB' });
+  if (demoProjectExists) return;
+
+  const meta = mongoose.connection.collection<{ _id: string; at: Date }>('_meta');
+  try {
+    await meta.insertOne({ _id: SEED_LOCK_ID, at: new Date() });
+  } catch (error) {
+    if ((error as { code?: number }).code === 11000) return; // another instance owns the seed
+    throw error;
+  }
+
+  try {
+    await populateSeedData();
+  } catch (error) {
+    await meta.deleteOne({ _id: SEED_LOCK_ID });
+    throw error;
+  }
+}
+
 async function prepare(): Promise<void> {
   await connectDatabase();
-  if ((await User.estimatedDocumentCount()) === 0) {
-    await populateSeedData();
+  try {
+    await seedOnce();
+  } catch (error) {
+    // Never block the API because demo data could not be created.
+    // eslint-disable-next-line no-console
+    console.error('Demo seed failed', error);
   }
 }
 
