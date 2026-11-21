@@ -53,3 +53,7 @@ server/.jest-cache/
 .sudo_as_admin_successful
 
 server/.test-db-url
+
+# Video recording scratch files
+docs/demo/.*
+
