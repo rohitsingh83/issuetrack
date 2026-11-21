@@ -7,6 +7,9 @@ Teams create projects, track issues on a Kanban board, filter and search across 
 upload screenshots and see each other's changes **live** — with real role-based permissions enforced in the
 API, not just hidden in the UI.
 
+**🔗 Live demo: https://issuetrack-eight.vercel.app** — click any *Try a demo account* card on the sign-in page
+(Owner, Admin, Member or Viewer) to explore with seeded data, or create your own account.
+
 <p align="center">
   <img src="docs/screenshots/04-kanban-board.png" alt="Kanban board with three columns of issues" width="900">
 </p>
@@ -381,7 +384,18 @@ Server tests expect a reachable MongoDB at `MONGODB_URI_TEST` (default
 
 ## Deployment
 
-Step-by-step instructions with every variable and dashboard setting:
+**Live deployment (Vercel + MongoDB Atlas)** — https://issuetrack-eight.vercel.app
+
+The whole app runs as one Vercel project: the SPA is served from `client/dist`, and `api/index.ts` wraps the same
+Express app as a Vercel Function at `/api`, so browser and API share an origin (no cross-site cookies). The database
+is a free MongoDB Atlas cluster created from the project's **Storage** tab, which injects `MONGODB_URI`. On first boot
+the function seeds the demo dataset exactly once (guarded by a lock document, so concurrent cold starts can't collide).
+Project environment variables: `NODE_ENV=production`, `JWT_SECRET`, `COOKIE_SECURE=true`, `COOKIE_SAME_SITE=lax`,
+`TRUST_PROXY=true`, `VITE_REALTIME=off`, `VITE_CLERK_PUBLISHABLE_KEY`, plus `CLERK_SECRET_KEY` to enable Google
+sign-in. Every push to `main` redeploys. Serverless functions cannot hold Socket.io connections, so live updates are
+off on Vercel (the UI still refreshes after every change); use Render/Railway (below) if you need realtime in production.
+
+Step-by-step instructions for the other targets, with every variable and dashboard setting:
 [`docs/deployment.md`](docs/deployment.md).
 
 | Piece | Target | Config in this repo |
