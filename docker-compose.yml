@@ -1,0 +1,75 @@
+# IssueTrack — full local stack (MongoDB + API + web client)
+#
+#   cp .env.example .env      # then edit JWT_SECRET / SEED_DEMO_PASSWORD
+#   docker compose up --build
+#   docker compose exec api npm run seed   # optional demo data
+#
+# Web client : http://localhost:8080
+# API        : http://localhost:4000/api/health
+# MongoDB    : mongodb://localhost:27017/issuetrack (host access for Compass)
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: issuetrack-mongo
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: issuetrack-api
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      MONGODB_URI: mongodb://mongo:27017/issuetrack
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env — openssl rand -hex 48}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      COOKIE_NAME: ${COOKIE_NAME:-it_token}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      COOKIE_SAME_SITE: ${COOKIE_SAME_SITE:-lax}
+      # The browser talks to nginx (:8080), which proxies to this container.
+      CLIENT_ORIGIN: ${CLIENT_ORIGIN:-http://localhost:8080,http://127.0.0.1:8080}
+      UPLOAD_DIR: /app/uploads
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-5}
+      AUTH_RATE_LIMIT_WINDOW_MINUTES: ${AUTH_RATE_LIMIT_WINDOW_MINUTES:-15}
+      AUTH_RATE_LIMIT_MAX: ${AUTH_RATE_LIMIT_MAX:-30}
+      API_RATE_LIMIT_WINDOW_MINUTES: ${API_RATE_LIMIT_WINDOW_MINUTES:-15}
+      API_RATE_LIMIT_MAX: ${API_RATE_LIMIT_MAX:-2000}
+      SEED_DEMO_PASSWORD: ${SEED_DEMO_PASSWORD:-Password123!}
+    ports:
+      - '4000:4000'
+    volumes:
+      - uploads:/app/uploads
+
+  web:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        # Empty → the SPA calls relative /api, proxied by nginx to the api service
+        VITE_API_URL: ''
+    container_name: issuetrack-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - '8080:80'
+
+volumes:
+  mongo-data:
+  uploads:

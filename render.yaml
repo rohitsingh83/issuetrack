@@ -1,0 +1,50 @@
+# Render Blueprint for the IssueTrack API (https://render.com/docs/blueprint-spec)
+# Push the repo to GitHub → Render → New → Blueprint → pick the repo.
+# Values marked `sync: false` must be filled in the Render dashboard.
+services:
+  - type: web
+    name: issuetrack-api
+    runtime: node
+    plan: starter
+    region: oregon
+    rootDir: server
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    disk:
+      name: issuetrack-uploads
+      mountPath: /opt/render/project/src/uploads
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: MONGODB_URI # MongoDB Atlas SRV connection string
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: COOKIE_NAME
+        value: it_token
+      - key: COOKIE_SECURE
+        value: 'true'
+      # The Vercel site is a different origin → the auth cookie must be SameSite=None
+      - key: COOKIE_SAME_SITE
+        value: none
+      - key: CLIENT_ORIGIN # e.g. https://issuetrack.vercel.app
+        sync: false
+      - key: UPLOAD_DIR
+        value: /opt/render/project/src/uploads
+      - key: MAX_UPLOAD_MB
+        value: 5
+      - key: AUTH_RATE_LIMIT_MAX
+        value: 30
+      - key: AUTH_RATE_LIMIT_WINDOW_MINUTES
+        value: 15
+      - key: API_RATE_LIMIT_MAX
+        value: 2000
+      - key: API_RATE_LIMIT_WINDOW_MINUTES
+        value: 15

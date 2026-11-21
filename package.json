@@ -1,0 +1,28 @@
+{
+  "name": "issuetrack",
+  "version": "1.0.0",
+  "private": true,
+  "description": "IssueTrack — a production-ready MERN (MongoDB, Express, React, Node) Jira-style issue and bug tracker",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "install:all": "npm install --prefix server && npm install --prefix client",
+    "dev": "concurrently -n api,web -c blue,magenta \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:server": "npm run dev --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "seed": "npm run seed --prefix server",
+    "build": "npm run build --prefix server && npm run build --prefix client",
+    "start": "npm run start --prefix server",
+    "test": "npm run test --prefix server && npm run test --prefix client",
+    "test:server": "npm run test --prefix server",
+    "test:client": "npm run test --prefix client",
+    "lint": "npm run lint --prefix server && npm run lint --prefix client",
+    "typecheck": "npm run typecheck --prefix server && npm run typecheck --prefix client",
+    "format": "npm run format --prefix server && npm run format --prefix client",
+    "verify": "npm run lint && npm run typecheck && npm run test && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
+}

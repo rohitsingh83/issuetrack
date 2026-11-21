@@ -1,0 +1,15 @@
+{
+  "name": "issuetrack-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Optional Playwright browser journey for IssueTrack (not part of the unit-test gate)",
+  "scripts": {
+    "install-browser": "playwright install chromium",
+    "journey": "node journey.mjs",
+    "screenshots": "node screenshots.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.47.2"
+  }
+}

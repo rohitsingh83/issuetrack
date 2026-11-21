@@ -1,0 +1,54 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Builds
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# Tests
+coverage/
+.nyc_output/
+
+# Environment — never commit real secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Uploads written at runtime (screenshots attached to issues)
+server/uploads/*
+!server/uploads/.gitkeep
+
+# Logs
+*.log
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Caches
+.vite/
+.eslintcache
+.cache/
+
+# Playwright artefacts
+e2e/results.json
+
+# Local embedded database, caches, tool state
+server/data/
+server/.volter/
+server/.jest-cache/
+.volter/
+.claude/
+.sudo_as_admin_successful
+
