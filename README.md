@@ -10,6 +10,10 @@ API, not just hidden in the UI.
 **🔗 Live demo: https://issuetrack-eight.vercel.app** — click any *Try a demo account* card on the sign-in page
 (Owner, Admin, Member or Viewer) to explore with seeded data, or create your own account.
 
+**🎬 Walkthrough video (1½ min):** [`docs/demo/issuetrack-walkthrough.webm`](docs/demo/issuetrack-walkthrough.webm) —
+sign-in, dashboard, creating a bug, drag-and-drop on the Kanban board, comments, search & filters, members & roles.
+Recorded automatically against the live site by [`e2e/walkthrough.mjs`](e2e/walkthrough.mjs).
+
 <p align="center">
   <img src="docs/screenshots/04-kanban-board.png" alt="Kanban board with three columns of issues" width="900">
 </p>
