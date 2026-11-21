@@ -36,7 +36,7 @@ API, not just hidden in the UI.
 ## Live feature tour
 
 **Auth & accounts**
-Email + password sign-up/sign-in, optional **"Continue with Google or GitHub" via Clerk** (the API verifies the
+Email + password sign-up/sign-in, optional **"Continue with Google" via Clerk** (the API verifies the
 Clerk session token server-side before issuing its own session), one-click demo accounts, JWT in an httpOnly cookie, session bootstrap on reload, logout,
 profile editing, password change, protected client routes with redirect-back-to-intended-page.
 
@@ -256,11 +256,14 @@ Full tables live in [`docs/deployment.md`](docs/deployment.md#5-environment-vari
 | `VITE_PROXY_TARGET` | Dev proxy target, default `http://localhost:4000` |
 | `VITE_CLERK_PUBLISHABLE_KEY` | Optional — Clerk publishable key (`pk_test_…`) from the same Clerk app |
 
-### Clerk sign-in (Google / GitHub)
+### Clerk sign-in (Google)
 
-1. In the [Clerk dashboard](https://dashboard.clerk.com) open your application → **API keys**.
-2. Put the publishable key in `client/.env.local` as `VITE_CLERK_PUBLISHABLE_KEY` and the secret key in
-   `server/.env` as `CLERK_SECRET_KEY`. Enable Google/GitHub under **User & authentication → Social connections**.
+1. Sign the Clerk CLI in once: `npx -y clerk@latest auth login`.
+2. Pull the development keys straight into the env files (nobody has to copy secrets by hand):
+   `npx -y clerk@latest env pull --file .env` inside `server/`, and
+   `npx -y clerk@latest env pull --file .env.local` inside `client/` (then delete the `CLERK_SECRET_KEY` line from the
+   client file — the browser only needs `VITE_CLERK_PUBLISHABLE_KEY`). Social providers are configured under
+   **User & authentication → Social connections** in the [Clerk dashboard](https://dashboard.clerk.com).
 3. Restart `npm run dev`. The button appears only when **both** keys are set.
 
 How it stays secure: the browser sends only Clerk's short-lived session token to `POST /api/auth/clerk`. The API

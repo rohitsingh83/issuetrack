@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { SignInButton, useAuth as useClerkAuth, useClerk } from '@clerk/react';
+import { useAuth as useClerkAuth, useClerk } from '@clerk/react';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AlertCircle, Loader2 } from 'lucide-react';
@@ -14,14 +14,6 @@ function GoogleMark() {
       <path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.6-2.8c-1 .7-2.2 1-3.7 1-2.9 0-5.3-1.9-6.2-4.5H2.1v2.9A11 11 0 0 0 12 23Z" />
       <path fill="#FBBC05" d="M5.8 14a6.6 6.6 0 0 1 0-4.1V7H2.1a11 11 0 0 0 0 9.9L5.8 14Z" />
       <path fill="#EA4335" d="M12 5.4c1.6 0 3 .6 4.2 1.6l3.1-3.1A11 11 0 0 0 2.1 7l3.7 2.9C6.7 7.3 9.1 5.4 12 5.4Z" />
-    </svg>
-  );
-}
-
-function GitHubMark() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4 fill-slate-900" aria-hidden="true">
-      <path d="M12 .5a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6A11.5 11.5 0 0 0 12 .5Z" />
     </svg>
   );
 }
@@ -74,23 +66,22 @@ function ClerkSignInInner({ label }: { label: string }) {
 
   return (
     <div className="space-y-2">
-      <SignInButton mode="modal">
-        <button
+      <button
           type="button"
+          onClick={() => {
+            setError(null);
+            clerk.openSignIn({});
+          }}
           disabled={disabled}
           className="group flex w-full items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 hover:shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-70"
         >
           {busy ? (
             <Loader2 className="h-4 w-4 animate-spin text-brand-600" aria-hidden="true" />
           ) : (
-            <span className="flex items-center gap-1.5">
-              <GoogleMark />
-              <GitHubMark />
-            </span>
+            <GoogleMark />
           )}
           <span>{busy ? 'Signing you in…' : label}</span>
         </button>
-      </SignInButton>
       {error && (
         <p role="alert" className="flex items-center gap-1.5 text-xs text-rose-700">
           <AlertCircle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
@@ -102,7 +93,7 @@ function ClerkSignInInner({ label }: { label: string }) {
 }
 
 /** Renders the Clerk button plus an "or" divider — only when both client and API have Clerk keys. */
-export function ClerkSignIn({ label = 'Continue with Google or GitHub' }: { label?: string }) {
+export function ClerkSignIn({ label = 'Continue with Google' }: { label?: string }) {
   const { data } = useQuery({
     queryKey: ['auth', 'providers'],
     queryFn: async () => (await api.auth.providers()).data,

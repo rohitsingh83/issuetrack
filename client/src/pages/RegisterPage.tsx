@@ -67,7 +67,7 @@ export function RegisterPage() {
       }
     >
       <div className="mb-4">
-        <ClerkSignIn label="Sign up with Google or GitHub" />
+        <ClerkSignIn label="Sign up with Google" />
       </div>
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
         {formError && (
